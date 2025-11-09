@@ -2360,6 +2360,12 @@ main(int argc, char** argv)
 	if (process_cmdline(argc,argv) != true)
 		die("unable to process command line.\n");
 
+	/* Set orientation environment variable for libnsfb */
+	if (nsoption_charp(fb_orientation) != NULL) {
+		setenv("NETSURF_FB_ORIENTATION", nsoption_charp(fb_orientation), 1);
+		NSLOG(netsurf, INFO, "Set screen orientation to: %s", nsoption_charp(fb_orientation));
+	}
+
 	nsfb = framebuffer_initialise(fename, fewidth, feheight, febpp);
 	if (nsfb == NULL)
 		die("Unable to initialise framebuffer");

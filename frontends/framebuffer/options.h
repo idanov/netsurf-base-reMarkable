@@ -66,6 +66,11 @@ NSOPTION_STRING(fb_face_fantasy, NULL)
 NSOPTION_STRING(fb_download_directory, NULL)
 NSOPTION_STRING(fb_xochitl_restart_command, "systemctl reboot")
 
+/***** reMarkable specific options *****/
+
+/** screen orientation: "portrait" or "landscape" */
+NSOPTION_STRING(fb_orientation, "portrait")
+
 /*
  * Local Variables:
  * c-basic-offset:8
