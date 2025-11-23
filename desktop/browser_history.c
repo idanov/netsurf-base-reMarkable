@@ -357,12 +357,27 @@ browser_window_history_add(struct browser_window *bw,
 	struct history_entry *entry;
 	char *title;
 	nserror ret;
+	struct nsurl *new_url;
 
 	assert(bw);
 	assert(bw->history);
 	assert(content);
 
 	history = bw->history;
+	new_url = hlcache_handle_get_url(content);
+
+	/* Check if we're navigating to the same URL (e.g., refresh).
+	 * If so, just update the existing entry instead of creating a new one.
+	 * This prevents memory leak from accumulating history entries on refresh.
+	 */
+	if (history->current != NULL && 
+	    history->current->page.url != NULL &&
+	    nsurl_compare(history->current->page.url, new_url, NSURL_COMPLETE)) {
+		NSLOG(netsurf, DEBUG,
+		      "URL unchanged (%s), updating existing history entry",
+		      nsurl_access(new_url));
+		return browser_window_history_update(bw, content);
+	}
 
 	entry = malloc(sizeof *entry);
 	if (entry == NULL) {
@@ -376,7 +391,7 @@ browser_window_history_add(struct browser_window *bw,
 		return NSERROR_NOMEM;
 	}
 
-	entry->page.url = nsurl_ref(hlcache_handle_get_url(content));
+	entry->page.url = nsurl_ref(new_url);
 	entry->page.frag_id = frag_id ? lwc_string_ref(frag_id) : NULL;
 	entry->page.title = title;
 	entry->page.scroll_x = 0.0f;
